@@ -25,7 +25,7 @@ public final class FXMLManager {
 	 * @return разметка и контроллер к ней
 	 */
 	public static <T> RootWithController<T> load(String fileName, T controller) {
-		final String filePath = "trio/view/" + fileName + ".fxml";
+		final String filePath = "trio/view/forms/" + fileName + ".fxml";
 		final Parent root;
 		
 		FXMLLoader loader = new FXMLLoader(FXMLManager.class.getClassLoader().getResource(filePath));

@@ -133,7 +133,7 @@ public class ConnectionFormController {
 	}
 	
 	private Stage showWaiter(String gameId) {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("Waiter.fxml"));
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("forms/WaiterForm.fxml"));
 		Parent     root   = null;
 		try {
 			root = loader.load();
