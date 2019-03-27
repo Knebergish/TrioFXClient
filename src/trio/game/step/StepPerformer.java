@@ -1,8 +1,7 @@
-package trio.view.step;
+package trio.game.step;
 
 
 import trio.model.field.Field;
-import trio.view.Step;
 
 import java.util.function.Consumer;
 

@@ -1,4 +1,4 @@
-package trio.view;
+package trio.game;
 
 
 import trio.model.field.Field;

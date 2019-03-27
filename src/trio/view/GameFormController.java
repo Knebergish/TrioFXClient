@@ -8,10 +8,12 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import trio.game.Representation;
+import trio.game.step.Step;
 import trio.model.field.CellType;
 import trio.model.field.Coordinates;
 import trio.model.field.Field;
-import trio.view.step.StepPerformer;
+import trio.game.step.StepPerformer;
 
 import java.util.function.Consumer;
 

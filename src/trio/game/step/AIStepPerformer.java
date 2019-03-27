@@ -1,11 +1,10 @@
-package trio.view.step;
+package trio.game.step;
 
 
 import javafx.application.Platform;
 import trio.core.FieldManipulator;
 import trio.core.PossibleStep;
 import trio.model.field.Field;
-import trio.view.Step;
 
 import java.util.List;
 import java.util.concurrent.FutureTask;

@@ -10,12 +10,14 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import trio.core.Response;
 import trio.core.TrioFacade;
+import trio.game.GameCredentials;
+import trio.game.GameOrchestrator;
 import trio.model.game.Game;
 import trio.model.gamer.Gamer;
 import trio.view.fxml.FXMLManager;
 import trio.view.fxml.RootWithController;
-import trio.view.step.AIStepPerformer;
-import trio.view.step.StepPerformer;
+import trio.game.step.AIStepPerformer;
+import trio.game.step.StepPerformer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

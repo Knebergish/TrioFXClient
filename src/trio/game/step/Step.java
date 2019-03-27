@@ -1,4 +1,4 @@
-package trio.view;
+package trio.game.step;
 
 
 import trio.model.field.Coordinates;

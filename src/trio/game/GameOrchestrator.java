@@ -1,4 +1,4 @@
-package trio.view;
+package trio.game;
 
 
 import javafx.application.Platform;
@@ -7,10 +7,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import trio.core.Response;
 import trio.core.TrioFacade;
+import trio.game.step.StepPerformer;
 import trio.model.field.Field;
 import trio.model.field.StepResult;
 import trio.model.game.Game;
-import trio.view.step.StepPerformer;
+import trio.game.step.Step;
 
 import java.rmi.RemoteException;
 import java.util.List;

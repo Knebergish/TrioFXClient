@@ -1,4 +1,4 @@
-package trio.view;
+package trio.game;
 
 
 public class GameCredentials {
