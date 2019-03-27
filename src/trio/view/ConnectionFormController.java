@@ -24,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 
 
-@SuppressWarnings("unused")
 public class ConnectionFormController {
 	private final TrioFacade trioFacade;
 	
