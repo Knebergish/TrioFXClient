@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Font?>
+
+<GridPane alignment="center" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="trio.view.GameFormController">
+    <columnConstraints>
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.0" minWidth="10.0" percentWidth="20" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="596.0" minWidth="10.0" percentWidth="60" />
+        <ColumnConstraints hgrow="SOMETIMES" maxWidth="295.0" minWidth="10.0" percentWidth="20" />
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+    </rowConstraints>
+    <GridPane fx:id="area" alignment="CENTER" GridPane.columnIndex="1">
+    </GridPane>
+    <AnchorPane prefHeight="200.0" prefWidth="100.0">
+        <Label fx:id="nameUserLabel" layoutX="68.0" layoutY="6.0" text="Label" textAlignment="CENTER">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Label>
+        <Label fx:id="scoreLabel" layoutX="103.0" layoutY="46.0" text="0">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+        <Label layoutX="48.0" layoutY="46.0" text="Счёт:">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+      <Circle fx:id="primoCircle" fill="WHITE" layoutX="14.0" layoutY="14.0" radius="13.0" stroke="BLACK" strokeType="INSIDE" />
+    </AnchorPane>
+    <AnchorPane prefHeight="200.0" prefWidth="100.0" GridPane.columnIndex="2">
+        <Label fx:id="nameUser2Label" layoutX="68.0" layoutY="6.0" text="Label" textAlignment="CENTER">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Label>
+        <Label fx:id="score2Label" layoutX="103.0" layoutY="46.0" text="0">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+        <Label layoutX="48.0" layoutY="46.0" text="Счёт:">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Label>
+      <Circle fx:id="secundoCircle" fill="WHITE" layoutX="166.0" layoutY="14.0" radius="13.0" stroke="BLACK" strokeType="INSIDE" />
+    </AnchorPane>
+</GridPane>
