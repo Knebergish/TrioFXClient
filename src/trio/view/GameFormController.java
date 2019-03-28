@@ -1,20 +1,27 @@
 package trio.view;
 
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import trio.game.Representation;
 import trio.game.step.Step;
+import trio.game.step.StepPerformer;
 import trio.model.field.CellType;
 import trio.model.field.Coordinates;
 import trio.model.field.Field;
-import trio.game.step.StepPerformer;
 
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.function.Consumer;
 
 
@@ -44,18 +51,74 @@ public class GameFormController implements Representation, StepPerformer {
 	
 	@Override
 	public void setGamerScore(String gamerName, int score) {
-		if (gamerName.equals(nameUserLabel.getText())) {
-			scoreLabel.setText(String.valueOf(score));
-		} else if (gamerName.equals(nameUser2Label.getText())) {
-			score2Label.setText(String.valueOf(score));
-		} else {
-			throw new RuntimeException("Игрок с таким именем не зарегистрирован!");
+		Platform.runLater(() -> {
+			if (gamerName.equals(nameUserLabel.getText())) {
+				scoreLabel.setText(String.valueOf(score));
+			} else if (gamerName.equals(nameUser2Label.getText())) {
+				score2Label.setText(String.valueOf(score));
+			} else {
+				if (!askSkipError("Игрок с именем" + gamerName + " не зарегистрирован!")) {
+					System.exit(13);
+				}
+			}
+		});
+	}
+	
+	@Override
+	public boolean askSkipError(String text) {
+		FutureTask<Boolean> task = new Task<>() {
+			@Override
+			protected Boolean call() {
+				Alert alert = new Alert(Alert.AlertType.WARNING);
+				alert.setTitle("Ошибка!");
+				alert.setHeaderText(text);
+				alert.setContentText("Продолжить выполнение программы?");
+				
+				ButtonType yesButton = new ButtonType("Да");
+				ButtonType noButton  = new ButtonType("Нет");
+				
+				alert.getButtonTypes().setAll(yesButton, noButton);
+				Optional<ButtonType> buttonType = alert.showAndWait();
+				if (!buttonType.isPresent()) return false;
+				return "Да".equals(buttonType.get().getText());
+			}
+		};
+		Platform.runLater(task);
+		try {
+			return task.get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+			return false;
 		}
 	}
 	
-	@SuppressWarnings("CssUnknownTarget")
+	@Override
+	public void endGame(String winnerName) {
+		FutureTask<Void> task = new Task<>() {
+			@Override
+			protected Void call() {
+				Alert alert = new Alert(Alert.AlertType.WARNING);
+				alert.setTitle("Игра окончена.");
+				alert.setHeaderText("Победил игрок " + winnerName + "!");
+				alert.showAndWait();
+				return null;
+			}
+		};
+		Platform.runLater(task);
+		try {
+			task.get();
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void setField(Field field) {
+		Platform.runLater(() -> updateField(field));
+	}
+	
+	@SuppressWarnings("CssUnknownTarget")
+	private void updateField(Field field) {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
 				CellType cellType = field.get(i, j);
@@ -88,14 +151,16 @@ public class GameFormController implements Representation, StepPerformer {
 	
 	@Override
 	public void setEnabledMakeStep(boolean enabled) {
-		this.enabled = enabled;
-		if (enabled) {
-			primoCircle.setFill(Color.GREEN);
-			secundoCircle.setFill(Color.RED);
-		} else {
-			primoCircle.setFill(Color.RED);
-			secundoCircle.setFill(Color.GREEN);
-		}
+		Platform.runLater(() -> {
+			this.enabled = enabled;
+			if (enabled) {
+				primoCircle.setFill(Color.GREEN);
+				secundoCircle.setFill(Color.RED);
+			} else {
+				primoCircle.setFill(Color.RED);
+				secundoCircle.setFill(Color.GREEN);
+			}
+		});
 	}
 	
 	@Override

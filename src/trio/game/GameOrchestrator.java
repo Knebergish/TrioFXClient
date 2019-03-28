@@ -1,23 +1,16 @@
 package trio.game;
 
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import trio.core.Response;
 import trio.core.TrioFacade;
+import trio.game.step.Step;
 import trio.game.step.StepPerformer;
 import trio.model.field.Field;
 import trio.model.field.StepResult;
 import trio.model.game.Game;
-import trio.game.step.Step;
 
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 
 
 public class GameOrchestrator {
@@ -72,8 +65,7 @@ public class GameOrchestrator {
 					drawAnimation(game.getLastStepResult());
 				}
 			}
-			updateField(game);
-			updateScore(game);
+			updateState(game);
 			
 			if (game.getStatus() == 2) {
 				System.out.println("Игра завершена.");
@@ -82,10 +74,10 @@ public class GameOrchestrator {
 			}
 			
 			System.out.println("Проверяем возможность ходить...");
-			System.err.println(game.getCurrentGamerName() + " vs " + creds.getGamerName());
+			System.out.println(game.getCurrentGamerName() + " vs " + creds.getGamerName());
 			boolean canMakeStep = game.getCurrentGamerName().equals(creds.getGamerName());
 			if (canMakeStep) {
-				Platform.runLater(() -> stepPerformer.setField(game.getField()));
+				stepPerformer.setField(game.getField());
 				representation.setEnabledMakeStep(true);
 				stepPerformer.setEnabledMakeStep(true);
 				System.out.println("Ожидаем хода пользователя.");
@@ -100,35 +92,8 @@ public class GameOrchestrator {
 	}
 	
 	private <T> T checkAndGetData(Response<T> response) {
-		FutureTask<Boolean> task = new Task<>() {
-			@Override
-			protected Boolean call() {
-				Alert alert = new Alert(Alert.AlertType.WARNING);
-				alert.setTitle("Ошибка!");
-				alert.setHeaderText(response.getErrorText());
-				alert.setContentText("Продолжить выполнение программы?");
-				
-				ButtonType yesButton = new ButtonType("Yes");
-				ButtonType noButton  = new ButtonType("No");
-				
-				alert.getButtonTypes().setAll(yesButton, noButton);
-				Optional<ButtonType> buttonType = alert.showAndWait();
-				if (!buttonType.isPresent()) return false;
-				return "Yes".equals(buttonType.get().getText());
-			}
-		};
-		
 		if (response.hasError()) {
-			System.err.println(response.getErrorText());
-			
-			boolean result;
-			try {
-				Platform.runLater(task);
-				result = task.get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-				result = false;
-			}
+			boolean result = representation.askSkipError(response.getErrorText());
 			if (result) {
 				return null;
 			} else {
@@ -151,35 +116,14 @@ public class GameOrchestrator {
 		}
 	}
 	
-	private void updateField(Game game) {
-		Platform.runLater(() -> representation.setField(game.getField()));
-	}
-	
-	private void updateScore(Game game) {
-		Platform.runLater(() -> {
-			representation.setGamerScore(game.getGamers().get(0).getName(), game.getGamers().get(0).getScore());
-			representation.setGamerScore(game.getGamers().get(1).getName(), game.getGamers().get(1).getScore());
-		});
+	private void updateState(Game game) {
+		representation.setField(game.getField());
+		representation.setGamerScore(game.getGamers().get(0).getName(), game.getGamers().get(0).getScore());
+		representation.setGamerScore(game.getGamers().get(1).getName(), game.getGamers().get(1).getScore());
 	}
 	
 	private void endGame(String gamerName) {
-		FutureTask<Void> task = new Task<>() {
-			@Override
-			protected Void call() {
-				Alert alert = new Alert(Alert.AlertType.WARNING);
-				alert.setTitle("Игра окончена.");
-				alert.setHeaderText("Победил игрок " + gamerName + "!");
-				
-				alert.showAndWait();
-				return null;
-			}
-		};
-		Platform.runLater(task);
-		try {
-			task.get();
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
+		representation.endGame(gamerName);
 	}
 	
 	private void wait(int time) {
