@@ -140,7 +140,10 @@ public class ConnectionFormController {
 		                                                         creds,
 		                                                         gameForm.getController(),
 		                                                         stepPerformer);
-		Thread thread = new Thread(() -> wrapTry(gameOrchestrator::start));
+		Thread thread = new Thread(() -> {
+			wrapTry(gameOrchestrator::start);
+			System.exit(13);
+		});
 		thread.start();
 		
 		nameTextField.getScene().getWindow().hide();
