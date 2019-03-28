@@ -2,27 +2,21 @@ package trio.core;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleAbstractTypeResolver;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import trio.ObjectMapperFactory;
 import trio.model.field.Coordinates;
-import trio.model.field.Field;
-import trio.model.field.FieldImpl;
 import trio.model.field.StepResult;
 import trio.model.game.Game;
-import trio.model.game.GameImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,9 +102,9 @@ public class HttpTrioFacade implements TrioFacade {
 			con.disconnect();
 //			System.out.println("R: " + response);
 			
-			ObjectMapper               mapper   = ObjectMapperFactory.createMapper();
-			TypeFactory typeFactory = mapper.getTypeFactory();
-			JavaType    type        = typeFactory.constructParametricType(Response.class, clazz);
+			ObjectMapper mapper      = ObjectMapperFactory.createMapper();
+			TypeFactory  typeFactory = mapper.getTypeFactory();
+			JavaType     type        = typeFactory.constructParametricType(Response.class, clazz);
 			return mapper.readValue(response.toString(), type);
 		} catch (IOException e) {
 			throw new RemoteException("Ошибька", e);
@@ -129,11 +123,9 @@ public class HttpTrioFacade implements TrioFacade {
 		}
 		
 		String convertToString() {
-			try {
-				return URLEncoder.encode(name, "UTF-8") + '=' + URLEncoder.encode(value, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				throw new RuntimeException(e);
-			}
+			return URLEncoder.encode(name, StandardCharsets.UTF_8)
+			       + '='
+			       + URLEncoder.encode(value, StandardCharsets.UTF_8);
 		}
 		
 		public String getName() {
