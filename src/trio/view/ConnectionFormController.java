@@ -17,9 +17,12 @@ import trio.view.fxml.FXMLManager;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 
 public class ConnectionFormController {
+	private static final Logger log = Logger.getLogger("TrioLogging");
+	
 	private final TrioFacade trioFacade;
 	
 	@FXML
@@ -44,8 +47,10 @@ public class ConnectionFormController {
 	private void connectToGame(final GameIdSupplier supplier) {
 		wrapTry(() -> {
 			validateGamerName(nameTextField.getText());
-			final String gameId = supplier.getGameId();
-			connectToGame(gameId, new String(nameTextField.getText().getBytes(), StandardCharsets.UTF_8));
+			final String gameId    = supplier.getGameId();
+			String       gamerName = new String(nameTextField.getText().getBytes(), StandardCharsets.UTF_8);
+			log.warning("Gamer name: " + gamerName);
+			connectToGame(gameId, gamerName);
 		});
 	}
 	
@@ -53,6 +58,7 @@ public class ConnectionFormController {
 		try {
 			action.start();
 		} catch (Exception e) {
+			log.severe("Error: " + e.getMessage());
 			showError(e.getMessage());
 			e.printStackTrace();
 		}

@@ -11,9 +11,12 @@ import trio.model.game.Game;
 
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.logging.Logger;
 
 
 public class GameOrchestrator {
+	private static final Logger log = Logger.getLogger("TrioLogging");
+	
 	private final TrioFacade      trioFacade;
 	private final GameCredentials creds;
 	private final Representation  representation;
@@ -33,18 +36,18 @@ public class GameOrchestrator {
 		stepPerformer.setEnabledMakeStep(false);
 		stepPerformer.subscribeToMakeStep(this::performStep);
 		
-		System.out.println("Получены учётные данные: " + creds);
+		log.warning("Credentials received: " + creds);
 	}
 	
 	public void start() throws RemoteException {
 		int stepNumber = -1;
 		
-		System.out.println("Игра запущена.");
+		log.warning("Game started.");
 		while (true) {
 			if (localStep != null) {
 				representation.setEnabledMakeStep(false);
 				stepPerformer.setEnabledMakeStep(false);
-				System.out.println("Пользователь сходил: " + localStep);
+				log.info("User made a step: " + localStep);
 				StepResult localStepResult = checkAndGetData(trioFacade.makeStep(creds.getGameId(),
 				                                                                 creds.getGamerId(),
 				                                                                 localStep.getSource(),
@@ -56,7 +59,7 @@ public class GameOrchestrator {
 				stepNumber++;
 			}
 			
-			System.out.println("Обновляем состояние игры...");
+			log.info("Update game state...");
 			Game game = checkAndGetData(trioFacade.getGameState(creds.getGameId(), creds.getGamerId()));
 			if (game == null) continue;
 			if (stepNumber != game.getStepNumber()) {
@@ -68,21 +71,21 @@ public class GameOrchestrator {
 			updateState(game);
 			
 			if (game.getStatus() == 2) {
-				System.out.println("Игра завершена.");
+				log.warning("Game is end.");
 				endGame(game.getWinnerGamerName());
 				break;
 			}
 			
-			System.out.println("Проверяем возможность ходить...");
-			System.out.println(game.getCurrentGamerName() + " vs " + creds.getGamerName());
+			log.info("Check the ability to make step...");
+			log.info(game.getCurrentGamerName() + " vs " + creds.getGamerName());
 			boolean canMakeStep = game.getCurrentGamerName().equals(creds.getGamerName());
 			if (canMakeStep) {
 				stepPerformer.setField(game.getField());
 				representation.setEnabledMakeStep(true);
 				stepPerformer.setEnabledMakeStep(true);
-				System.out.println("Ожидаем хода пользователя.");
+				log.info("Waiting for user step.");
 			} else {
-				System.out.println("Ожидаем ход противника.");
+				log.info("Waiting for opponent step.");
 			}
 			
 			wait(200);
@@ -93,10 +96,13 @@ public class GameOrchestrator {
 	
 	private <T> T checkAndGetData(Response<T> response) {
 		if (response.hasError()) {
+			log.severe("Game error: " + response.getErrorText());
 			boolean result = representation.askSkipError(response.getErrorText());
 			if (result) {
+				log.severe("Error skipped.");
 				return null;
 			} else {
+				log.severe("Interruption.");
 				System.exit(13);
 			}
 		}
@@ -130,6 +136,7 @@ public class GameOrchestrator {
 		try {
 			Thread.sleep(time);
 		} catch (InterruptedException e) {
+			log.severe("Pause error: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}

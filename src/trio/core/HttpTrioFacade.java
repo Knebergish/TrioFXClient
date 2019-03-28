@@ -20,10 +20,13 @@ import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 
 public class HttpTrioFacade implements TrioFacade {
+	private static final Logger log = Logger.getLogger("TrioLogging");
+	
 	private final String host;
 	
 	HttpTrioFacade(String host) {
@@ -86,10 +89,10 @@ public class HttpTrioFacade implements TrioFacade {
 				url += "?";
 				url += params.parallelStream().map(Parameter::convertToString).collect(Collectors.joining("&"));
 			}
+			log.info("Request: " + url);
 			HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
 			con.setRequestMethod("GET");
-
-//			int            responseCode = con.getResponseCode();
+			
 			BufferedReader in       = new BufferedReader(new InputStreamReader(con.getInputStream()));
 			String         inputLine;
 			StringBuilder  response = new StringBuilder();
@@ -100,7 +103,7 @@ public class HttpTrioFacade implements TrioFacade {
 			}
 			in.close();
 			con.disconnect();
-//			System.out.println("R: " + response);
+			log.info("Response: " + response);
 			
 			ObjectMapper mapper      = ObjectMapperFactory.createMapper();
 			TypeFactory  typeFactory = mapper.getTypeFactory();
