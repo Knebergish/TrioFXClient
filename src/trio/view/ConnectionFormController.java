@@ -3,8 +3,11 @@ package trio.view;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import trio.core.Response;
 import trio.core.TrioFacade;
 import trio.game.GameCredentials;
@@ -16,6 +19,7 @@ import trio.model.gamer.Gamer;
 import trio.view.fxml.FXMLManager;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
@@ -156,7 +160,58 @@ public class ConnectionFormController {
 	}
 	
 	private String createGame() throws Exception {
-		return getDataFromResponse(trioFacade.createGame());
+		var pair   = askFieldSize();
+		int width  = Integer.parseInt(pair.getKey());
+		int height = Integer.parseInt(pair.getValue());
+		
+		if (width < 3 || height < 3) {
+			throw new Exception("Размерности создаваемого поля должны быть не меньше 3.");
+		}
+		if (width > 8 || height > 8) {
+			throw new Exception("Слишком большое поле. Разрешено максимум 8x8 клеток.");
+		}
+		
+		return getDataFromResponse(trioFacade.createGame(width, height));
+	}
+	
+	private Pair<String, String> askFieldSize() throws Exception {
+		Dialog<Pair<String, String>> dialog = new Dialog<>();
+		dialog.setTitle("Создание игры");
+		
+		ButtonType loginButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+		dialog.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+		
+		GridPane gridPane = new GridPane();
+		gridPane.setHgap(10);
+		gridPane.setVgap(10);
+		gridPane.setPadding(new Insets(20, 10, 10, 10));
+		
+		TextField widthTextField = new TextField();
+		widthTextField.setPromptText("Ширина");
+		TextField heightTextField = new TextField();
+		heightTextField.setPromptText("Высота");
+		
+		gridPane.add(new Label("Ширина:"), 0, 0);
+		gridPane.add(widthTextField, 1, 0);
+		gridPane.add(new Label("Высота:"), 0, 1);
+		gridPane.add(heightTextField, 1, 1);
+		
+		dialog.getDialogPane().setContent(gridPane);
+		
+		Platform.runLater(widthTextField::requestFocus);
+		
+		dialog.setResultConverter(dialogButton -> {
+			if (dialogButton == loginButtonType) {
+				return new Pair<>(widthTextField.getText(), heightTextField.getText());
+			}
+			return null;
+		});
+		
+		Optional<Pair<String, String>> pair = dialog.showAndWait();
+		if (!pair.isPresent()) {
+			throw new Exception("Размерности поля не были введены.");
+		}
+		return pair.get();
 	}
 	
 	private String askGameId() throws Exception {

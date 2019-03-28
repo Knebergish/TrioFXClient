@@ -5,16 +5,19 @@ import trio.model.field.Coordinates;
 import trio.model.field.StepResult;
 import trio.model.game.Game;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 
-public interface TrioFacade {
+public interface TrioFacade extends Remote {
 	/**
 	 * Создаёт новую игру.
 	 *
+	 * @param width  ширина создаваемого поля.
+	 * @param height высота создаваемого поля.
 	 * @return ошибка или идентификатор игры.
 	 */
-	Response<String> createGame() throws RemoteException;
+	Response<String> createGame(int width, int height) throws RemoteException;
 	
 	/**
 	 * Подключает к игре нового игрока.

@@ -18,7 +18,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -34,8 +33,11 @@ public class HttpTrioFacade implements TrioFacade {
 	}
 	
 	@Override
-	public Response<String> createGame() throws RemoteException {
-		return get("createGame", new ArrayList<>(), String.class);
+	public Response<String> createGame(int width, int height) throws RemoteException {
+		List<Parameter> params = List.of(
+				new Parameter("width", String.valueOf(width)),
+				new Parameter("height", String.valueOf(height)));
+		return get("createGame", params, String.class);
 	}
 	
 	@Override
