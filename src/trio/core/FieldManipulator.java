@@ -17,6 +17,10 @@ public final class FieldManipulator {
 		final CellType[][] cells  = field.copyCells();
 		int                score  = 0;
 		
+		if (Math.abs(source.getX() - dest.getX()) + Math.abs(source.getY() - dest.getY()) != 1) {
+			return new StepResult(states, score);
+		}
+		
 		swap(source, dest, cells);
 		
 		Field newField = new FieldImpl(cells);
@@ -45,27 +49,10 @@ public final class FieldManipulator {
 		return new StepResult(states, score);
 	}
 	
-	public static void swap(Coordinates source, Coordinates dest, CellType[][] cells) {
-		CellType temp = cells[dest.getY()][dest.getX()];
-		cells[dest.getY()][dest.getX()] = cells[source.getY()][source.getX()];
-		cells[source.getY()][source.getX()] = temp;
-	}
-	
-	public static Set<Coordinates> getAllCellsForDelete(Field field) {
-		Set<Coordinates> cellsForDelete;
-		cellsForDelete = new HashSet<>();
-		for (int i = 0; i < field.getHeight(); i++) {
-			for (int j = field.getWidth() - 1; j >= 0; j--) {
-				cellsForDelete.addAll(getCellsForDelete(field, new Coordinates(i, j)));
-			}
-		}
-		return cellsForDelete;
-	}
-	
 	public static Field deleteCells(Field field, Set<Coordinates> coordinates) {
 		CellType[][] cells = field.copyCells();
 		for (Coordinates coord : coordinates) {
-			cells[coord.getX()][coord.getY()] = null;
+			cells[coord.getY()][coord.getX()] = null;
 		}
 		return new FieldImpl(cells);
 	}
@@ -96,65 +83,37 @@ public final class FieldManipulator {
 		return new FieldImpl(cells);
 	}
 	
-	public static Set<Coordinates> getCellsForDelete(Field field, Coordinates target) {
-		Set<Coordinates> coordinates = new HashSet<>();
-		
-		int firstX = target.getX();
-		while (firstX > 0
-		       && field.get(firstX - 1, target.getY()) == field.get(target.getX(), target.getY())) {
-			firstX--;
-		}
-		int countX = 1;
-		while (firstX + countX < field.getWidth()
-		       && field.get(firstX + countX, target.getY()) == field.get(target.getX(), target.getY())) {
-			countX++;
-		}
-		
-		int firstY = target.getY();
-		while (firstY > 0
-		       && field.get(target.getX(), firstY - 1) == field.get(target.getX(), target.getY())) {
-			firstY--;
-		}
-		int countY = 1;
-		while (firstY + countY < field.getHeight()
-		       && field.get(target.getX(), firstY + countY) == field.get(target.getX(), target.getY())) {
-			countY++;
-		}
-		
-		if (countX > 2) {
-			for (int i = firstX; i < firstX + countX; i++) {
-				coordinates.add(new Coordinates(i, target.getY()));
-			}
-		}
-		if (countY > 2) {
-			for (int j = firstY; j < firstY + countY; j++) {
-				coordinates.add(new Coordinates(target.getX(), j));
-			}
-		}
-		
-		return coordinates;
-	}
-	
 	public static Field createField(int width, int height) {
-		CellType[][] cells = new CellType[height][width];
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				cells[i][j] = getRandomCellValue();
-			}
-		}
-		Field field = new FieldImpl(cells);
+		Field field = generateRandomField(width, height);
 		
 		while (true) {
-			final Set<Coordinates> cellsForDelete = getAllCellsForDelete(field);
-			if (cellsForDelete.isEmpty()) {
-				break;
+			while (true) {
+				final Set<Coordinates> cellsForDelete = getAllCellsForDelete(field);
+				if (cellsForDelete.isEmpty()) {
+					break;
+				} else {
+					field = deleteCells(field, cellsForDelete);
+					field = vacuumAndFillField(field);
+				}
+			}
+			if (getPossibleSteps(field).isEmpty()) {
+				field = generateRandomField(width, height);
 			} else {
-				field = deleteCells(field, cellsForDelete);
-				field = vacuumAndFillField(field);
+				break;
 			}
 		}
 		
 		return field;
+	}
+	
+	private static Field generateRandomField(int width, int height) {
+		CellType[][] cells = new CellType[height][width];
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				cells[y][x] = getRandomCellValue();
+			}
+		}
+		return new FieldImpl(cells);
 	}
 	
 	public static List<PossibleStep> getPossibleSteps(Field field) {
@@ -187,8 +146,64 @@ public final class FieldManipulator {
 			}
 		}
 		
-		steps.sort(Comparator.comparingInt(PossibleStep::getScore));
+		steps.sort(Comparator.comparingInt(PossibleStep::getScore).reversed());
 		return steps;
+	}
+	
+	public static void swap(Coordinates source, Coordinates dest, CellType[][] cells) {
+		CellType temp = cells[dest.getY()][dest.getX()];
+		cells[dest.getY()][dest.getX()] = cells[source.getY()][source.getX()];
+		cells[source.getY()][source.getX()] = temp;
+	}
+	
+	public static Set<Coordinates> getAllCellsForDelete(Field field) {
+		Set<Coordinates> cellsForDelete;
+		cellsForDelete = new HashSet<>();
+		for (int y = 0; y < field.getHeight(); y++) {
+			for (int x = 0; x < field.getWidth(); x++) {
+				cellsForDelete.addAll(getCellsForDelete(field, new Coordinates(x, y)));
+			}
+		}
+		return cellsForDelete;
+	}
+	
+	public static Set<Coordinates> getCellsForDelete(Field field, Coordinates target) {
+		Set<Coordinates> coordinates = new HashSet<>();
+		
+		int firstX = target.getX();
+		while (firstX > 0
+		       && field.get(firstX - 1, target.getY()) == field.get(target.getX(), target.getY())) {
+			firstX--;
+		}
+		int countX = 1;
+		while (firstX + countX < field.getWidth()
+		       && field.get(firstX + countX, target.getY()) == field.get(target.getX(), target.getY())) {
+			countX++;
+		}
+		
+		int firstY = target.getY();
+		while (firstY > 0
+		       && field.get(target.getX(), firstY - 1) == field.get(target.getX(), target.getY())) {
+			firstY--;
+		}
+		int countY = 1;
+		while (firstY + countY < field.getHeight()
+		       && field.get(target.getX(), firstY + countY) == field.get(target.getX(), target.getY())) {
+			countY++;
+		}
+		
+		if (countX > 2) {
+			for (int x = firstX; x < firstX + countX; x++) {
+				coordinates.add(new Coordinates(x, target.getY()));
+			}
+		}
+		if (countY > 2) {
+			for (int y = firstY; y < firstY + countY; y++) {
+				coordinates.add(new Coordinates(target.getX(), y));
+			}
+		}
+		
+		return coordinates;
 	}
 	
 	public static CellType getRandomCellValue() {

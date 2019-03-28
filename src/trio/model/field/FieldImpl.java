@@ -14,7 +14,7 @@ public class FieldImpl implements Field, Serializable {
 	
 	@JsonCreator
 	public FieldImpl(@JsonProperty("cells") CellType[][] cells) {
-		this.cells = cells.clone();
+		this.cells = cells;
 	}
 	
 	public CellType[][] copyCells() {
@@ -27,7 +27,7 @@ public class FieldImpl implements Field, Serializable {
 	
 	@Override
 	public CellType get(int x, int y) {
-		return cells[x][y];
+		return cells[y][x];
 	}
 	
 	@Override

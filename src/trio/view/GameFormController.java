@@ -121,7 +121,7 @@ public class GameFormController implements Representation, StepPerformer {
 	private void updateField(Field field) {
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				CellType cellType = field.get(i, j);
+				CellType cellType = field.get(j, i);
 				
 				if (cellType == null) {
 					buttons[i][j].setStyle("");
