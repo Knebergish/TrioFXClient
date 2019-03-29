@@ -62,6 +62,10 @@ public class GameOrchestrator {
 			log.info("Update game state...");
 			Game game = checkAndGetData(trioFacade.getGameState(creds.getGameId(), creds.getGamerId()));
 			if (game == null) continue;
+			if (game.getStatus() == 0) {
+				log.info("Game not started.");
+				continue;
+			}
 			if (stepNumber != game.getStepNumber()) {
 				stepNumber = game.getStepNumber();
 				if (game.getLastStepResult() != null) {
