@@ -23,7 +23,7 @@ public final class FieldManipulator {
 		
 		swap(source, dest, cells);
 		
-		Field newField = new FieldImpl(cells);
+		Field newField = new FieldImpl(cells, field.getCosts());
 		states.add(newField);
 		
 		while (true) {
@@ -31,12 +31,12 @@ public final class FieldManipulator {
 			if (cellsForDelete.isEmpty()) {
 				List<PossibleStep> possibleSteps = getPossibleSteps(newField);
 				if (possibleSteps.isEmpty()) {
-					states.add(createField(newField.getWidth(), newField.getHeight()));
+					states.add(createField(newField.getWidth(), newField.getHeight(), field.getCosts()));
 				}
 				break;
 			} else {
 				for (Coordinates c : cellsForDelete) {
-					score += newField.get(c.getX(), c.getY()).getCost();
+					score += field.getCosts().get(newField.get(c.getX(), c.getY()));
 				}
 				newField = deleteCells(newField, cellsForDelete);
 				states.add(newField);
@@ -54,7 +54,7 @@ public final class FieldManipulator {
 		for (Coordinates coord : coordinates) {
 			cells[coord.getY()][coord.getX()] = null;
 		}
-		return new FieldImpl(cells);
+		return new FieldImpl(cells, field.getCosts());
 	}
 	
 	public static Field vacuumAndFillField(Field field) {
@@ -80,11 +80,11 @@ public final class FieldManipulator {
 			}
 		}
 		
-		return new FieldImpl(cells);
+		return new FieldImpl(cells, field.getCosts());
 	}
 	
-	public static Field createField(int width, int height) {
-		Field field = generateRandomField(width, height);
+	public static Field createField(int width, int height, Map<CellType, Integer> costs) {
+		Field field = generateRandomField(width, height, costs);
 		
 		while (true) {
 			while (true) {
@@ -97,7 +97,7 @@ public final class FieldManipulator {
 				}
 			}
 			if (getPossibleSteps(field).isEmpty()) {
-				field = generateRandomField(width, height);
+				field = generateRandomField(width, height, costs);
 			} else {
 				break;
 			}
@@ -106,14 +106,14 @@ public final class FieldManipulator {
 		return field;
 	}
 	
-	private static Field generateRandomField(int width, int height) {
+	private static Field generateRandomField(int width, int height, Map<CellType, Integer> costs) {
 		CellType[][] cells = new CellType[height][width];
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				cells[y][x] = getRandomCellValue();
 			}
 		}
-		return new FieldImpl(cells);
+		return new FieldImpl(cells, costs);
 	}
 	
 	public static List<PossibleStep> getPossibleSteps(Field field) {
@@ -133,12 +133,12 @@ public final class FieldManipulator {
 				
 				for (Coordinates dest : dests) {
 					swap(source, dest, cells);
-					Set<Coordinates> allCellsForDelete = getAllCellsForDelete(new FieldImpl(cells));
+					Set<Coordinates> allCellsForDelete = getAllCellsForDelete(new FieldImpl(cells, field.getCosts()));
 					if (!allCellsForDelete.isEmpty()) {
 						steps.add(new PossibleStep(source,
 						                           dest,
 						                           allCellsForDelete.parallelStream()
-						                                            .mapToInt(c -> cells[c.getY()][c.getX()].getCost())
+						                                            .mapToInt(c -> field.getCosts().get(cells[c.getY()][c.getX()]))
 						                                            .sum()));
 					}
 					swap(dest, source, cells);
