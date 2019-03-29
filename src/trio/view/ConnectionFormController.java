@@ -186,9 +186,9 @@ public class ConnectionFormController {
 		gridPane.setVgap(10);
 		gridPane.setPadding(new Insets(20, 10, 10, 10));
 		
-		TextField widthTextField = new TextField();
+		TextField widthTextField = new TextField("8");
 		widthTextField.setPromptText("Ширина");
-		TextField heightTextField = new TextField();
+		TextField heightTextField = new TextField("8");
 		heightTextField.setPromptText("Высота");
 		
 		gridPane.add(new Label("Ширина:"), 0, 0);
